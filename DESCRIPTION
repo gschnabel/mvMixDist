@@ -1,0 +1,25 @@
+Package: mvMixDist
+Version: 0.1.0
+Date: 2019-01-22
+Title: mvMixDist: Sampling and Fitting of Multivariate Mixture Distributions
+Authors@R: c(person("Georg", "Schnabel", role = c("aut", "cre"),
+		     email = "georg.schnabel@nucleardata.com"))
+Author: Georg Schnabel [aut, cre],
+Maintainer: Georg Schnabel <georg.schnabel@nucleardata.com>
+Depends:
+    R (>= 3.1.0)
+Description: This package implements multivariate distributions and
+    mixtures thereof as S4 classes. Functions are provided to 
+    query probability densities, sample from distributions, and
+    estimate distributions parameters either via the EM algorithm
+    or Gibbs sampling.
+License: GPL (>= 3)
+URL: https://www.r-project.org, https://github.com/gschnabel/mvMixDist
+BugReports: https://github.com/gschnabel/mvMixDist/issues
+RoxygenNote: 6.1.1
+Collate: 
+  'dist_generic.R'
+  'dist_mixture.R'
+  'dist_mvn.R'
+  'dist_constant.R'
+  'distributions.R'
