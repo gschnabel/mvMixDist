@@ -96,27 +96,59 @@ setMethod("getPosteriorSample",
           ),
           definition=function(dist, x, n) {
             
+            # storage for results
+            distList <- replicate(n, NULL, simplify = FALSE)
             # prior
             prior <- dist@prior
-            mu0 <- prior$mu0
-            kappa0 <- prior$kappa0
-            nu0 <- prior$nu0
-            phi <- prior$phi
-            # data
-            numObs <- ncol(x)
-            D <- cov.wt(t(x), method = "ML")
-            # posterior
-            mu1 <- (kappa0*mu0 + numObs*D$center) / (kappa0 + numObs)
-            kappa1 <- kappa0 + numObs
-            nu1 <- nu0 + numObs
-            phi1 <- phi + numObs*D$cov + (kappa0*numObs) / (kappa0+numObs) * 
-              tcrossprod(D$center - mu0)
-            # create samples
-            distList <- replicate(n, NULL, simplify = FALSE)
-            for (i in seq(n)) {
-              sampleCov <- riwish(nu1, phi1)
-              sampleMean <- as.vector(rmvnorm(1, mu1, 1/kappa1 * sampleCov))
-              distList[[i]] <- createDist_MVN(sampleMean, sampleCov, prior = dist@prior)
+            if (prior$type == "normal-invWish") {
+                mu0 <- prior$mu0
+                kappa0 <- prior$kappa0
+                nu0 <- prior$nu0
+                phi <- prior$phi
+                # data
+                numObs <- ncol(x)
+                D <- cov.wt(t(x), method = "ML")
+                # posterior
+                mu1 <- (kappa0*mu0 + numObs*D$center) / (kappa0 + numObs)
+                kappa1 <- kappa0 + numObs
+                nu1 <- nu0 + numObs
+                phi1 <- phi + numObs*D$cov + (kappa0*numObs) / (kappa0+numObs) * 
+                  tcrossprod(D$center - mu0)
+                # create samples
+                for (i in seq(n)) {
+                  # for the normal-invere Wishart prior
+                  # we get a normal-inverse Wishart posterior
+                  # with some new parameters mu1, kappa1, nu1, phi1
+                  # sampling now works by first drawing a covariance matrix
+                  # from the inverse Wishart distribution and then
+                  # drawing a new mean from a multivariate normal distribution
+                  # using the sampled covariance matrix
+                  sampleCov <- riwish(nu1, phi1)
+                  sampleMean <- as.vector(rmvnorm(1, mu1, 1/kappa1 * sampleCov))
+                  distList[[i]] <- createDist_MVN(sampleMean, sampleCov, prior = prior)
+                }
+            }
+            else if (prior$type=="Jeffrey") {
+              
+               # for the Jeffrey's prior, we need Gibbs sampling to alternate
+               # between sampling a mean vector and a covariance matrix
+               # given a mean vector, the conditional posterior for the
+               # covariance matrix is an inverse Wishart distribution
+               # given a covariance matrix, the mean is sampled from 
+               # a multivariate normal distribution
+               numObs <- ncol(x)
+               obsMean <- rowMeans(x)
+               p <- length(obsMean)
+
+               sampleCov <- dist@sigma
+               sampleMean <- dist@mean
+
+               for (i in seq(n)) {
+                   sampleMean <- as.vector(rmvnorm(1, obsMean, sampleCov / numObs))
+                   Smat <- numObs * cov.wt(t(x), center = sampleMean, method = "ML")$cov
+                   sampleCov <- riwish(numObs, Smat)
+                   distList[[i]] <- createDist_MVN(sampleMean, sampleCov, prior = prior)
+               }
             }
             distList
           })
