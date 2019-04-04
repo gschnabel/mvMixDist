@@ -15,9 +15,10 @@ dontrun <- function() {
   myDist2 <- createDist_MVN(mean=trueMean2,sigma=trueSigma2, prior = myPrior)
   myDist3 <- createDist_Const(box=c(-20,-20,40,40))
   myDist <- createDist_Mix(c(0.1, 0.3, 0.6), list(myDist1, myDist2, myDist3),
-                           prior = list(alpha = 1))
+                           prior = list(alpha = rep(1,3)))
   
   smpl <- getSample(myDist, 1000)
+  getPriorDensity(myDist, log=TRUE)
   
 
   getMLEstimate(myDist, smpl)

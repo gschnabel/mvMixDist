@@ -88,6 +88,28 @@ setMethod("getMLEstimate",
             createDist_MVN(pars$center, pars$cov)
           })
 
+
+setMethod("getPriorDensity",
+          signature=list(
+            dist = "mvndist"
+          ),
+          definition=function(dist, log=TRUE) {
+
+              prior <- dist@prior
+              priorDens <- NA_real_
+              if (prior$type == "Jeffrey") {
+                 priorDens <- (-(nrow(dist@sigma) + 1)) * dist@logDetSigma 
+              }
+              else if (prior$type == "normal-invWish") {
+                priorDens <- log(diwish(dist@sigma, prior@nu0, prior@phi)) + 
+                      dmvnorm(dist@mean, prior@mu0, 1/prior@kappa0 * dist@sigma, log=TRUE)
+              } else 
+                  stop(paste0("Unknown prior type ", prior$type))
+
+              if (log) priorDens else exp(priorDens)
+          })
+
+
 setMethod("getPosteriorSample",
           signature=list(
             dist = "mvndist",

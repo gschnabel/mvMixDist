@@ -66,6 +66,15 @@ setMethod("getMLEstimate",
           })
 
 
+setMethod("getPriorDensity",
+          signature=list(
+            dist = "constdist"
+          ),
+          definition=function(dist, log=TRUE) {
+           if (log) 0 else 1  
+          })
+
+
 setMethod("getPosteriorSample",
           signature=list(
             dist = "constdist",

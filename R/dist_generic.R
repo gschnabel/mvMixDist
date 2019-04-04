@@ -42,6 +42,19 @@ setGeneric("getMLEstimate",
 )
 
 
+#' Get Prior Density
+#'
+#' @param dist a distribution object
+#' @param n number of samples
+#' @param ... distribution specific tuning parameters
+#'
+#' @export
+#'
+setGeneric("getPriorDensity",
+           function(dist, ...)
+               standardGeneric("getPriorDensity")
+)
+
 #' Get Posterior Sample
 #'
 #' @param dist a distribution object

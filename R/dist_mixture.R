@@ -82,6 +82,22 @@ setMethod("getDensity",
             res
           })
 
+
+setMethod("getPriorDensity",
+          signature=list(
+            dist = "mixdist"
+          ),
+          definition=function(dist, log=TRUE) {
+            
+            numComp <- length(dist@prop)
+            priorDens <- log(ddirichlet(dist@prop, dist@prior$alpha))
+            for (k in seq_len(numComp)) {
+              priorDens <- priorDens + getPriorDensity(dist@comp[[k]], log = TRUE)
+            } 
+            if (log) priorDens else exp(priorDens) 
+          })
+
+
 setMethod("getMLEstimate",
           signature=list(
             dist = "mixdist",
