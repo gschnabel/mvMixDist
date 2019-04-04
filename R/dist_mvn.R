@@ -23,7 +23,8 @@ setClass("mvndist",
            L="matrix",
            invL="matrix",
            logDetSigma="numeric",
-           prior = 'list'
+           prior = 'list',
+           extra = 'list'
          ),
          prototype=list(
            mean=0,
@@ -31,7 +32,8 @@ setClass("mvndist",
            L=matrix(1),
            invL=matrix(1),
            logDetSigma=1,
-           prior = list()
+           prior = list(),
+           extra = list()
          ),
          validity=function(object) {
            all(dim(object@sigma)==length(object@mean))
@@ -165,9 +167,16 @@ setMethod("getPosteriorSample",
                sampleCov <- dist@sigma
                sampleMean <- dist@mean
 
+               # FIXME this is a cheat...
+               #if (numObs==0)
+               #    obsMean <- rep(0, p)
+               #numObs <- max(numObs, p)
+
                for (i in seq(n)) {
                    sampleMean <- as.vector(rmvnorm(1, obsMean, sampleCov / numObs))
                    Smat <- numObs * cov.wt(t(x), center = sampleMean, method = "ML")$cov
+                   # FIXME another cheat
+                   #diag(Smat) <- diag(Smat) + 1e-6
                    sampleCov <- riwish(numObs, Smat)
                    distList[[i]] <- createDist_MVN(sampleMean, sampleCov, prior = prior)
                }

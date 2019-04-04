@@ -29,13 +29,15 @@ setClass("mixdist",
            prop="numeric",
            comp="list",
            dim="numeric",
-           prior = 'list'
+           prior = 'list',
+           extra = 'list'
          ),
          prototype=list(
            prop=numeric(0),
            comp=list(),
            dim=0L,
-           prior = list()
+           prior = list(),
+           extra = list()
          ),
          validity=function(object) {
            isTRUE(length(object@prop)==length(object@comp) &&
@@ -131,12 +133,14 @@ setMethod("getMembership",
             for (curComp in seq(numComp))
               res[curComp,] <- logProp[curComp] + getDensity(dist@comp[[curComp]], x, log=TRUE)
             res <- apply(res,2,function(x) x-max(x))
+            dim(res) <- c(numComp, ncol(x))
             
             if (isTRUE(log)) {
               res <- apply(res,2,function(x) x - log(sum(exp(x))))
             }
             else
               res <- apply(exp(res),2,function(x) x/sum(x))
+            dim(res) <- c(numComp, ncol(x))
             res
           })
 
@@ -169,8 +173,16 @@ setMethod("getPosteriorSample",
               # sample from dirichlet posterior
               counts <- colSums(outer(z, 1:numComp, `==`))
               dist@prop <- as.vector(rdirichlet(1, alpha + counts))
+              # density for marginal likelihood
+              likeDens <- sum(getDensity(dist, x, log=TRUE))
+              priorDens <- getPriorDensity(dist, log=TRUE)
+              scaledPostDens <- likeDens + priorDens
+              dist@extra <- list(priorDens = priorDens,
+                                 likeDens = likeDens,
+                                 scaledPostDens = scaledPostDens)
               # save
               distList[[i]] <- dist
+
             }
             distList
           })

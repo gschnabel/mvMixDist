@@ -10,10 +10,12 @@ createDist_Const <- function(box) {
 
 setClass("constdist",
          slots=list(
-           box = 'numeric'
-         ),
+           box = 'numeric',
+           extra = 'list'
+        ),
          prototype=list(
-           box = numeric(0)
+           box = numeric(0),
+           extra = list()
          ),
          validity = function(object) {
            length(object@box) %% 2 == 0
