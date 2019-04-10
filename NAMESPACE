@@ -3,6 +3,7 @@
 export(createDist_Const)
 export(createDist_MVN)
 export(createDist_Mix)
+export(createDist_exp)
 export(getBIC)
 export(getDensity)
 export(getMLEstimate)

@@ -99,7 +99,7 @@ setMethod("getPriorDensity",
 
               prior <- dist@prior
               priorDens <- NA_real_
-              if (prior$type == "Jeffrey") {
+              if (prior$type == "Jeffreys") {
                  priorDens <- (-(nrow(dist@sigma) + 1)) * dist@logDetSigma 
               }
               else if (prior$type == "normal-invWish") {
@@ -152,9 +152,9 @@ setMethod("getPosteriorSample",
                   distList[[i]] <- createDist_MVN(sampleMean, sampleCov, prior = prior)
                 }
             }
-            else if (prior$type=="Jeffrey") {
+            else if (prior$type=="Jeffreys") {
               
-               # for the Jeffrey's prior, we need Gibbs sampling to alternate
+               # for the Jeffreys's prior, we need Gibbs sampling to alternate
                # between sampling a mean vector and a covariance matrix
                # given a mean vector, the conditional posterior for the
                # covariance matrix is an inverse Wishart distribution
@@ -180,7 +180,8 @@ setMethod("getPosteriorSample",
                    sampleCov <- riwish(numObs, Smat)
                    distList[[i]] <- createDist_MVN(sampleMean, sampleCov, prior = prior)
                }
-            }
+            } else
+                stop("Unknown prior distribution type")
             distList
           })
 

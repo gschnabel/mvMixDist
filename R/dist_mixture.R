@@ -164,7 +164,7 @@ setMethod("getPosteriorSample",
               for (j in seq_along(z)) {
                 z[j] <- sample.int(numComp, 1, prob = memShip[,j])
               }
-              # sample mvn components
+              # sample components
               for (curComp in seq(numComp)) {
                 selectedPoints <- x[,z==curComp,drop=FALSE]
                 dist@comp[[curComp]] <- getPosteriorSample(dist@comp[[curComp]], 
